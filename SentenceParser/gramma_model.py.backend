@@ -11,6 +11,154 @@
 # 1. 优化输入， 终结符可以写成以$符号分割的序列， 定义终结符列表
 # 2. 在读入序列的时候判断这个序列是什么类型， 为 Symbol 类增加一个 val 字段， 存入当前符号 
 # 
+G_4_6 = [
+    'S -> a@A',
+    'S -> b@B',
+    'A -> c@A',
+    'A -> d',
+    'B -> c@B',
+    'B -> d',
+]
+# Nonfinal = set(['S','A','B'])
+
+G_closure_test = [
+    'S_ -> ·S',
+]
+
+G_4_4 = [
+    'S -> T@E_',
+    'E_ -> +@T@E_',
+    'E_ -> e_',
+    'T -> F@T_',
+    'T_ -> *@F@T_',
+    'T_ -> e_',
+    'F -> (@S@)',
+    'F->id'
+]
+# Nonfinal = set(['S','E_','T', 'T_', 'F'])
+
+G_4_4_R = [
+    'S -> S@+@T',
+    'S -> T',
+    'E -> e_',
+    'T -> T@*@F',
+    'T -> F',
+    'F -> (@S@)',
+    'F->id'
+]
+# Nonfinal = set(['S','T' ,'E', 'F'])
+
+G_SLR_test = [
+    'S -> B@A',
+    'S -> A@B',
+    'A -> a@B',
+    'A -> c',
+    'B -> a@D@A',
+    'B -> d',
+    'D->f'
+]
+
+G_LR_test = [
+    'S -> C@C',
+    'C -> c@C',
+    'C -> d',
+]
+# 默认在非终结符号中算上
+# Nonfinal = set(['E', 'E_', 'T', 'T_', 'F'])
+# Nonfinal = set(['S', 'A', 'B','S_'])
+
+
+# Nonfinal = set(['S', 'A', 'B','S_', 'D','C', ])
+
+G_CC = [
+    'S -> K@V@N@;',
+
+    'N -> =@E',
+    'N -> e_',
+
+    'E -> E@F@E',
+    'E -> V',
+
+    'F -> +',
+    'F -> -',
+    'F -> *',
+    'F -> /',
+
+    'K -> int',
+    'K -> float',
+
+
+    'V -> v',
+    'V -> a',
+    'V -> b',
+    'V -> c',
+    'V -> d',
+]
+
+G_e__test = [
+   'S->a@S|e_',
+]
+# Nonfinal = ['S']
+# 所有非终结符 都是用字母表示
+G_Expression = [
+    'S -> E',
+    'E -> E@FH@T',
+    'E -> T',
+    
+    'T -> T@FH@F',
+    'T -> F',
+
+    'F -> (@E@)',
+    'F -> id',
+    'FH->+',
+    'FH->-',
+    'FH->*',
+    'FH->/',
+    'FH->*',
+    'FH->/',
+    'FH-> >',
+    'FH-> =',
+
+]
+
+# Nonfinal = set(['S', 'E','F', 'T', 'FH'])
+
+# 4_4
+# Nonfinal = set(['S','E_','T', 'T_', 'F'])
+
+G_IF_ELSE_TEST={
+    'S->B@S',
+    'S->B',
+    'B->if@(@E@)@E@;',
+    'B->if@(@E@)@{@S@}',
+    'B->if@(@E@)@{@S@}@else@{@S@}',
+    'B->if@(@E@)@{@S@}@else@E@;',
+
+    'B->if@(@E@)@E@;@else@{@S@}',
+    'B->if@(@E@)@E@;@else@E@;',
+    'B->E@;',
+    
+    'E -> E@FH@T',
+    'E -> T',
+    'T -> T@FH@F',
+    'T -> F',
+    'F -> (@E@)',
+    'F -> id',
+
+    'FH->+',
+    'FH->-',
+    'FH->*',
+    'FH->/',
+
+    'FH-> >',
+    'FH-><',
+    'FH->=',
+    'FH->*=',
+}
+# Nonfinal = ['S','E', 'T', 'F', 'FH', 'B']
+
+
+
 
 G_CC = [
     # sentence
@@ -74,5 +222,5 @@ G_CC = [
     'initialize->=@E1|e_',
     'id_list->id@,@id_list|id',
 ]
-# 非终结符 列表/字典 在载入时生成
+
 Nonfinal = []

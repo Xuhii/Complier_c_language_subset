@@ -30,20 +30,16 @@ class LrAnalyzeDriver:
         # 使用数组模拟栈 list
         # find satate  0
         # print(self.Table)
-        tmp = ''
         state, smb, = [0], []
         while True:
             S, a = state[-1], W.cur()
             action = self.Table.action[S][a]
-            
             
             if action.ACTION == 'S':
                 # 三个栈在 Shift 动作保持一致
                 state.append(action.CONTENT)
                 smb.append(a)
                 self.node_stack.append(Node(a))
-                tmp += ' '+a.name
-                print('<id:{}>'.format(a.id), tmp)
                 W.next()
             elif action.ACTION == 'R':
                 # 构建 当前产生式 A->a 的 A节点
@@ -80,7 +76,7 @@ def s_parser(G, string, type='lr'):
         s = TokenStack.bystr(string)
     else:
         s = TokenStack.byword(string)
-
+    print("\n文法及分析表:", lr.Table)
     print("\n输入:",string)
     print("\n归约方式:")    
     lr.run(s)
