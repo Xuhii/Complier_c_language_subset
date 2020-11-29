@@ -1,0 +1,28 @@
+散列表：[-1, -1, -1, 0, -1]
+栈式符号表：[i  None  (None, None)  None  None  []  -1]
+块索引：[0]
+----------------------------------------------------------------------------------------------------
+散列表：[-1, 5, 4, 3, -1]
+栈式符号表：[i  None  (None, None)  None  None  []  -1, j  None  (None, None)  None  None  []  -1, k  None  (None, None)  None  None  []  1, l  None  (None, None)  None  None  []  0, m  None  (None, None)  None  None  []  -1, n  None  (None, None)  None  None  []  2]
+块索引：[0]
+----------------------------------------------------------------------------------------------------
+(i  None  (None, None)  None  None  []  -1, True)
+(j  None  (None, None)  None  None  []  -1, True)
+(k  None  (None, None)  None  None  []  1, True)
+(l  None  (None, None)  None  None  []  0, True)
+(m  None  (None, None)  None  None  []  -1, True)
+(n  None  (None, None)  None  None  []  2, True)
+散列表：[-1, 5, 4, 3, -1]
+栈式符号表：[i  None  (None, None)  None  None  []  -1, j  None  (None, None)  None  None  []  -1, k  None  (None, None)  None  None  []  1, l  None  (None, None)  None  None  []  0, m  None  (None, None)  None  None  []  -1, n  None  (None, None)  None  None  []  2]
+块索引：[0]
+----------------------------------------------------------------------------------------------------
+散列表：[-1, 5, 11, 12, 6]
+栈式符号表：[i  None  (None, None)  None  None  []  -1, j  None  (None, None)  None  None  []  -1, k  None  (None, None)  None  None  []  1, l  None  (None, None)  None  None  []  0, m  None  (None, None)  None  None  []  -1, n  None  (None, None)  None  None  []  2, domain  None  (None, None)  None  None  []  -1, a  None  (None, None)  None  None  []  4, b  None  (None, None)  None  None  []  7, c  None  (None, None)  None  None  []  3, d  None  (None, None)  None  None  []  9, e  None  (None, None)  None  None  []  8, i  None  (None, None)  None  None  []  10]
+块索引：[0, 6]
+----------------------------------------------------------------------------------------------------
+(i  None  (None, None)  None  None  []  10, True)
+(j  None  (None, None)  None  None  []  -1, False)
+散列表：[-1, 5, 4, 3, -1]
+栈式符号表：[i  None  (None, None)  None  None  []  -1, j  None  (None, None)  None  None  []  -1, k  None  (None, None)  None  None  []  1, l  None  (None, None)  None  None  []  0, m  None  (None, None)  None  None  []  -1, n  None  (None, None)  None  None  []  2]
+块索引：[0]
+----------------------------------------------------------------------------------------------------
