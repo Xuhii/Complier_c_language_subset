@@ -1,8 +1,6 @@
 from SentenceParser.expression_model import *
 class TokenStack:
     def __init__(self, tokenList:list):
-        for i in range(len(tokenList)):
-            tokenList[i].id = i
         self.data =  tokenList + [Symbol('$')]
         self.pointer = 0
     def __str__(self):

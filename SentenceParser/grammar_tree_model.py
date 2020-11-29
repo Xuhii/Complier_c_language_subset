@@ -42,12 +42,17 @@ class Size:
     def __repr__(self):
         return self.__str__()
 
+# 如果要为节点添加新内容， 只需要在 val 的 Symbol 中添加， 而不是在 Node 类中添加
 class Node:    
     def __init__(self, val = None, inner = 3):
+        # 公有成员变量
+        # 这里的 val 是一个 Symbol 类型， 其中包含了 Pos ， 与用来画分析树的 Pos 不冲突
         self.next = []
         self.val = val
-        self.size = Size(0, 0)
-        self.pos = Pos(0, 0) 
+
+        # 私有成员变量
+        self.__size = Size(0, 0)
+        self.__pos = Pos(0, 0) 
     def __len__(self):
         return len(self.val)
     def __str__(self):
@@ -56,8 +61,8 @@ class Node:
     @staticmethod
     def compute_size(root, inner):
         if not root.next:
-            root.size = Size(1, 1)
-            return root.size
+            root.__size = Size(1, 1)
+            return root.__size
         s = Size(0, 0)
         for node in root.next:
             tmp = Node.compute_size(node, inner)
@@ -65,25 +70,25 @@ class Node:
             s.w += tmp.w
         s.h += len(root.val.name) + 4
         s.w += (len(root.next)-1) * inner
-        root.size = s
+        root.__size = s
         return s
     
     @staticmethod
     def compute_position(root, inner, offset):
         if not root.next:
-            root.pos.x += offset
-            return root.pos
+            root.__pos.x += offset
+            return root.__pos
 
         # 先顺
         for i, node in enumerate(root.next[::-1]):
             if not i:
-                node.pos = Pos(root.pos.x, root.pos.y + len(root.val.name) + 4)
+                node.__pos = Pos(root.__pos.x, root.__pos.y + len(root.val.name) + 4)
             else:
-                node.pos = Pos(
-                    root.next[::-1][i-1].pos.x 
-                        + root.next[::-1][i-1].size.w 
+                node.__pos = Pos(
+                    root.next[::-1][i-1].__pos.x 
+                        + root.next[::-1][i-1].__size.w 
                         + inner, 
-                    root.next[::-1][i-1].pos.y)
+                    root.next[::-1][i-1].__pos.y)
         
         # 递归调用
         left, right = None, None
@@ -93,11 +98,13 @@ class Node:
             right = tmp if i == len(root.next) - 1 else tmp
         
         # 后序
-        root.pos.x = (left.x + right.x)//2   
-        return root.pos
+        root.__pos.x = (left.x + right.x)//2   
+        return root.__pos
         
     @staticmethod
     def draw(root):
+        # test
+        # dfs(root)
         inner = 3
         S = Node.compute_size(root, inner)
         # Node.compute_left_up_position(root, inner,)
@@ -106,20 +113,20 @@ class Node:
         def _lane_vertical(node):
             nonlocal canvs
             if node.next:
-                for i in range(node.next[-1].pos.x, node.next[0].pos.x + 1):
+                for i in range(node.next[-1].__pos.x, node.next[0].__pos.x + 1):
                     if len(node.next) > 1:
-                        canvs[node.pos.y + len(node.val.name)][i] = ' '
-                        canvs[node.pos.y + len(node.val.name) + 1][i] = '┆'
+                        canvs[node.__pos.y + len(node.val.name)][i] = ' '
+                        canvs[node.__pos.y + len(node.val.name) + 1][i] = '┆'
                     else:
-                        canvs[node.pos.y  + len(node.val.name)][i] = ' '
-                        canvs[node.pos.y  + len(node.val.name) + 1][i] = '┄'
+                        canvs[node.__pos.y  + len(node.val.name)][i] = ' '
+                        canvs[node.__pos.y  + len(node.val.name) + 1][i] = '┄'
 
-            if node.pos.y - 1 >= 0:
-                canvs[node.pos.y - 2][node.pos.x]= '┄'
-                canvs[node.pos.y - 1][node.pos.x]= ' '
+            if node.__pos.y - 1 >= 0:
+                canvs[node.__pos.y - 2][node.__pos.x]= '┄'
+                canvs[node.__pos.y - 1][node.__pos.x]= ' '
 
             for i, ch in enumerate(node.val.name):
-                canvs[node.pos.y + i][node.pos.x]= ch
+                canvs[node.__pos.y + i][node.__pos.x]= ch
         def _draw(r):
             nonlocal canvs
             if not r:
@@ -135,7 +142,14 @@ class Node:
             res += '\n'
         return res
             
+def dfs(root):
+    if not root.next:
+        return
+    for node in root.next:
+        print(node.val.info())
+        dfs(node)
     
+
 if __name__ == "__main__":
     root = Node(Symbol('🌹'))
     L = [Node(Symbol('ℋ')),Node(Symbol('ℯ')),Node(Symbol('ℒ')),Node(Symbol('ℒ')),Node(Symbol('ℴ')),][::-1]

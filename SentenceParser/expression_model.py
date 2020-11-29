@@ -18,12 +18,12 @@ import copy
 from SentenceParser.gramma_model import *
 
 class Symbol:
-    def __init__(self, name:str, val=None, pos = None, ids=None):
+    def __init__(self, name:str, val=None, pos = None):
         self.name  = name
         self.final = False if name in Nonfinal else True
         self.val = val
+        # 该 symbol 在原文件中的位置（行， 列）
         self.pos = pos
-        self.id = ids
     def __str__(self, ):
         return self.name
     def __repr__(self):
@@ -39,6 +39,8 @@ class Symbol:
             return self.name + other
         elif isinstance(Symbol, other):
             return self.name + other.name
+    def info(self):
+        return '  '.join([str(self.name), str(self.final), str(self.val), self.pos.__str__()])
 class _Expression(object):
     def __init__(self, TYPE:str, data:list):
         self.TYPE = TYPE
