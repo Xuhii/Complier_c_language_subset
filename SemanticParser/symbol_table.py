@@ -119,6 +119,7 @@ if __name__ == "__main__":
     print("-"*100)
     t.insert(Record("domain"))
     t.location()
+    
     t.insert(Record("a"))
     t.insert(Record("b"))
     t.insert(Record("c"))

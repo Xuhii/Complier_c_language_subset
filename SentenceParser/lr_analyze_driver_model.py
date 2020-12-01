@@ -80,7 +80,7 @@ def s_parser(G, string, type='lr'):
     print("\n输入:",string)
     print("\n归约方式:")    
     lr.run(s)
-    print(lr.tree_node)
+    return lr.tree_node
 if __name__ == "__main__":
     
     # test(G_CC,"int v = a + b + c * d ;", 'lr')

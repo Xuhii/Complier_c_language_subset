@@ -53,10 +53,25 @@ class Node:
         # 私有成员变量
         self.__size = Size(0, 0)
         self.__pos = Pos(0, 0) 
+        
     def __len__(self):
         return len(self.val)
+
     def __str__(self):
         return Node.draw(self)
+
+    # 清除节点位置信息
+    def canvas_info_initialize(self):
+        self.__size = Size(0, 0)
+        self.__pos = Pos(0, 0)
+
+    # 清除子树位置信息
+    def canvas_info_clean(self):
+        if not self.next:
+            return
+        for node in self.next:
+            node.canvas_info_initialize()
+            node.canvas_info_clean()
 
     @staticmethod
     def compute_size(root, inner):
@@ -79,7 +94,7 @@ class Node:
             root.__pos.x += offset
             return root.__pos
 
-        # 先顺
+        # 先序
         for i, node in enumerate(root.next[::-1]):
             if not i:
                 node.__pos = Pos(root.__pos.x, root.__pos.y + len(root.val.name) + 4)
@@ -101,54 +116,66 @@ class Node:
         root.__pos.x = (left.x + right.x)//2   
         return root.__pos
         
+    # 绘制一个节点
     @staticmethod
-    def draw(root):
-        # test
-        # dfs(root)
-        inner = 3
-        S = Node.compute_size(root, inner)
-        # Node.compute_left_up_position(root, inner,)
-        _ = Node.compute_position(root, inner, inner * 2)
-        canvs = [[' ' for _ in range(S.w + 20)] for _ in range(S.h + 20)]
-        def _lane_vertical(node):
-            nonlocal canvs
-            if node.next:
-                for i in range(node.next[-1].__pos.x, node.next[0].__pos.x + 1):
-                    if len(node.next) > 1:
-                        canvs[node.__pos.y + len(node.val.name)][i] = ' '
-                        canvs[node.__pos.y + len(node.val.name) + 1][i] = '┆'
-                    else:
-                        canvs[node.__pos.y  + len(node.val.name)][i] = ' '
-                        canvs[node.__pos.y  + len(node.val.name) + 1][i] = '┄'
+    def lane_vertical(node, canvs):
+        # nonlocal canvs
+        if node.next:
+            for i in range(node.next[-1].__pos.x, node.next[0].__pos.x + 1):
+                if len(node.next) > 1:
+                    canvs[node.__pos.y + len(node.val.name)][i] = ' '
+                    canvs[node.__pos.y + len(node.val.name) + 1][i] = '┆'
+                else:
+                    canvs[node.__pos.y  + len(node.val.name)][i] = ' '
+                    canvs[node.__pos.y  + len(node.val.name) + 1][i] = '┄'
 
-            if node.__pos.y - 1 >= 0:
-                canvs[node.__pos.y - 2][node.__pos.x]= '┄'
-                canvs[node.__pos.y - 1][node.__pos.x]= ' '
+        if node.__pos.y - 1 >= 0:
+            canvs[node.__pos.y - 2][node.__pos.x]= '┄'
+            canvs[node.__pos.y - 1][node.__pos.x]= ' '
 
-            for i, ch in enumerate(node.val.name):
-                canvs[node.__pos.y + i][node.__pos.x]= ch
-        def _draw(r):
-            nonlocal canvs
-            if not r:
-                return
-            _lane_vertical(r)
-            for node in r.next[::-1]:
-                _draw(node)
-        _draw(root)
+        for i, ch in enumerate(node.val.name):
+            canvs[node.__pos.y + i][node.__pos.x]= ch
+    
+    # 递归绘制每一个子树
+    @staticmethod
+    def _draw(r, canvs):
+        if not r:
+            return
+        Node.lane_vertical(r, canvs)
+        for node in r.next[::-1]:
+            Node._draw(node, canvs)
+
+    @staticmethod
+    def ascii_str(canvs):
         res = ''
         for j in range(len(canvs[0])):
             for i in range(len(canvs)):
                 res += canvs[i][j]
             res += '\n'
         return res
-            
-def dfs(root):
-    if not root.next:
-        return
-    for node in root.next:
-        print(node.val.info())
-        dfs(node)
     
+    @staticmethod
+    def draw(root):
+        # 计算节点位置
+        inner = 3
+        S = Node.compute_size(root, inner)
+        _ = Node.compute_position(root, inner, inner * 2)
+        
+        # 生成画布
+        canvs = [[' ' for _ in range(S.w + 20)] for _ in range(S.h + 20)]
+        
+        # 递归绘制每一个子树
+        Node._draw(root, canvs)
+        
+        # 清除位置记录
+        root.canvas_info_clean()
+
+        # 返回 ASCII 字符串
+        return Node.ascii_str(canvs)
+        
+
+            
+
 
 if __name__ == "__main__":
     root = Node(Symbol('🌹'))

@@ -2,7 +2,7 @@ from SentenceParser.lr_analyze_driver_model import s_parser
 # from SentenceParser.gramma_model import G_CC
 from WordParser.word_parser import w_parser
 from SentenceParser.token_stack_model import *
-
+from SemanticParser.semantic_function import *
 # s_parser(G_Expression,"( a + b ) * c + d", 'slr')
 
 
@@ -19,7 +19,15 @@ from SentenceParser.token_stack_model import *
 # s_parser(G_CC, string, 'slr', debug=True)
 
 
-w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/demo.c')
+w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/compute.c')
+# w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/demo.c')
+
 print(w)
-s_parser(G_CC, w.check(), 'slr')
+root_node = s_parser(G_CC, w.check(), 'slr')
+# 绘制分析树
+print(root_node)
+
+
+# 测试 简单语义分析
+SemanticFunctionSet.S(root_node)
 
