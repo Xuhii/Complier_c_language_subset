@@ -13,7 +13,7 @@ from WordParser import tools
 import os
 import json
 import copy
-
+import time
 # 测试
 def w_parser(filename):
     ma = StateMa(matrix, final)
@@ -24,6 +24,7 @@ def w_parser(filename):
         while ma.move(source.get()):
             source.next()
         # if not source.EOF():source.back()
+
         result.append(copy.deepcopy(source.pos), ma)
         # print(source.pos)
         ma.initialize()

@@ -28,6 +28,7 @@ matrix = [
 final = [1,2,4,7,8,9,10,13,14,15, 17,18]
 
 kwrd = set([
+        "boolen",
         "int",
         "float",
         "for",

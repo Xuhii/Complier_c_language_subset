@@ -16,7 +16,7 @@ G_CC = [
     # sentence
     'S->sentence_list',
     'sentence_list->sentence@sentence_list|sentence|e_',
-    'sentence-> func_declare|func_define|if_sentence|for_sentence|while_sentence|go_sentence|expression_sentence|type_declare_sentence|complex_sentence',
+    'sentence-> func_define|if_sentence|for_sentence|while_sentence|go_sentence|expression_sentence|type_declare_sentence|complex_sentence',
     'go_sentence->CONTINUE@;|BREAK@;|RETURN@;|RETURN@expression@;',
     'complex_sentence->{@sentence_list@}',
 
@@ -33,6 +33,7 @@ G_CC = [
     # 暂时不实现位运算
     'expression_sentence->E1@;',
     'F1->+=|-=|*=|/=|%=|<<=|>>=|=',
+    'F_dot_exp->,',
     'F2->or',
     'F3->and',
     'F4->!=|==',
@@ -45,7 +46,8 @@ G_CC = [
 
     
 
-    'E1->E1@F1@E2|E2',
+    'E1->E1@F1@E_dot_exp|E_dot_exp',
+    'E_dot_exp->E_dot_exp@F_dot_exp@E2|E2',
     'E2->E2@F2@E3|E3',
     'E3->E3@F3@E4|E4',
     'E4->E4@F4@E5|E5',
@@ -55,18 +57,18 @@ G_CC = [
     'E8->E8@F8@E9|E9',
     # 这里的优先级是选 E9还是E10
     'E9->E10@F9_1|F9_2@E10|F9_1@E10|E10',
-    'E10 -> E10@[@E10@]|E11',
-    'E11->E11@,@E|E',
+    'E10 -> E10@[@E10@]|E',
+    # 'E11->E11@,@E|E',
     'E->(@E1@)|id|NUM|STR|id@(@E1@)',
 
 
     # 函数
-    'func_declare->type_statement@id@parameter_list@;',
-    'func_define->type_statement@id@parameter_list@complex_sentence',
-    'type_statement->int|float|void|char',
+    # 'func_declare->type_statement@id@(@list@)@;',
+    'func_define->type_statement@id@(@list@)@complex_sentence',
+    'type_statement->int|float|void|char|boolen',
 
-    'parameter_list->(@list@)',
     'list->list@,@parameter|parameter',
+    
     'parameter->type_statement@id|type_statement',
 
     # 声明 + 初始化语句 type_declare_sentence

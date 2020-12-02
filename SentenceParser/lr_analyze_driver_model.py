@@ -43,7 +43,7 @@ class LrAnalyzeDriver:
                 W.next()
             elif action.ACTION == 'R':
                 # 构建 当前产生式 A->a 的 A节点
-                cur_node = Node(action.CONTENT.left)
+                cur_node = Node(action.CONTENT.left, action.CONTENT)
                 for _ in range(len(action.CONTENT.right)):
                     smb.pop()
                     state.pop()

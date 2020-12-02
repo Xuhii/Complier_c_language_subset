@@ -29,4 +29,4 @@ print(root_node)
 
 
 # 测试 简单语义分析
-SemanticFunctionSet.S(root_node)
+# SemanticFunctionSet.S(root_node)

@@ -3,7 +3,7 @@
 #              🌹           
 #              |           
 #   +-----+---+-----+-----+
-#   ℋ     ℯ   ℒ     ℒ     ℴ
+#  ℋ     ℯ   ℒ    ℒ     ℴ
 #   |     |         |      
 # +---+   +       +---+    
 # W   o   r       l   d   
@@ -44,12 +44,14 @@ class Size:
 
 # 如果要为节点添加新内容， 只需要在 val 的 Symbol 中添加， 而不是在 Node 类中添加
 class Node:    
-    def __init__(self, val = None, inner = 3):
+    def __init__(self, val = None, production = None, inner = 3):
         # 公有成员变量
         # 这里的 val 是一个 Symbol 类型， 其中包含了 Pos ， 与用来画分析树的 Pos 不冲突
+        # Production 是当前节点中间使用的产生式， 并且子节点的 production 字段为空
         self.next = []
         self.val = val
-
+        self.production = production
+        
         # 私有成员变量
         self.__size = Size(0, 0)
         self.__pos = Pos(0, 0) 

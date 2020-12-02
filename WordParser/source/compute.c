@@ -1,1 +1,4 @@
-int num1,num2,op,ans = 1,2,3,4;
+int func(int a, int b){
+    int tmp1 = a + b;
+    int tmp2 = tmp1 + 1;
+}
