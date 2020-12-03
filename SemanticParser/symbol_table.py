@@ -20,6 +20,7 @@
 # 我们只取 name == id and final 的数据记录进符号表
 
 
+from prettytable import PrettyTable
 # 符号表结构：栈式哈希符号表
 class Record(object):
     def __init__(
@@ -33,20 +34,28 @@ class Record(object):
         self.DECLARE_LINE = declare_line
         self.REF_LINE_LIST = ref_line_list
         self.LINK_FIELD = link_field
-    def __str__(self):
-        return "{}  {}  {}  {}  {}  {}  {}".format(self.NAME,self.TYPE,self.ADDR,self.COUNT,self.DECLARE_LINE,str(self.REF_LINE_LIST),self.LINK_FIELD)
     def __repr__(self):
-        return self.__str__()
+        return [self.NAME,str(self.TYPE),str(self.ADDR),str(self.COUNT),str(self.DECLARE_LINE),str(self.REF_LINE_LIST),str(self.LINK_FIELD)]
+
 class SymbolTable(object):
     def __init__(self, hash_table_length = 100):
         self.hash_table_length = hash_table_length
         self.hash_list = [-1 for _ in range(hash_table_length)]
         self.record_stack = list()
         self.index_list = list()
-    def __str__(self):
-        return "散列表：{}\n栈式符号表：{}\n块索引：{}".format(str(self.hash_list), str(self.record_stack), str(self.index_list))
-    def __repr__(self):
-        return self.__str__()
+    def print(self):
+        table = PrettyTable(['index','Name','Type','Addr','Count', "Dec_line", 'Ref_list', 'line_filed'])
+        for index, item in enumerate(self.record_stack):
+            table.add_row([index] + item.__repr__())
+        print(table)
+        t2 = PrettyTable(['index', 'Block index'])
+        for index, i in enumerate(self.index_list[::-1]):
+            t2.add_row([index, str(i)])
+        print(t2)
+        print('\n'*2)
+        print("-"*100)
+        print('\n'*4)
+
     # 插入一条符号记录
     # TODO 逻辑不对， 冲突不代表名字相同
     def insert(self, record:Record):

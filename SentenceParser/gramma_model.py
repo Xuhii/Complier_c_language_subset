@@ -48,6 +48,7 @@ G_CC = [
 
     'E1->E1@F1@E_dot_exp|E_dot_exp',
     'E_dot_exp->E_dot_exp@F_dot_exp@E2|E2',
+
     'E2->E2@F2@E3|E3',
     'E3->E3@F3@E4|E4',
     'E4->E4@F4@E5|E5',
@@ -57,9 +58,9 @@ G_CC = [
     'E8->E8@F8@E9|E9',
     # 这里的优先级是选 E9还是E10
     'E9->E10@F9_1|F9_2@E10|F9_1@E10|E10',
-    'E10 -> E10@[@E10@]|E',
+    'E10->E10@[@E10@]|E',
     # 'E11->E11@,@E|E',
-    'E->(@E1@)|id|NUM|STR|id@(@E1@)',
+    'E->(@E2@)|id|NUM|STR|id@(@E_dot_exp@)|e_',
 
 
     # 函数

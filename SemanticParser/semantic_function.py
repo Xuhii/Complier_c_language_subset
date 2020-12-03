@@ -30,6 +30,7 @@
 
 from SemanticParser.type_define import *
 from SemanticParser.symbol_table import *
+from SentenceParser.production_model import *
 import time
 # 定义全局符号表, 哈希 mod = 100 
 # def insert(record:Record)
@@ -62,23 +63,23 @@ class SemanticFunctionSet:
     def S(node):
         # 在初始节点有一个 offset 变量用于存储变量的偏移量
         # 这个值可能不是 0 可能源于启动该程序时的内存区？？？（后续可以改为 S 的输入值）
-        
+        # 初始化符号表
+        smb_t.insert(Record('Program start'))
+        smb_t.location()
+
+        num, width = SemanticFunctionSet.sentence_list(node.next[0], 0)
+        smb_t.print()
+        return num, width
         
     
-    # 变量的声明处理
-    @staticmethod
-    def sentence_list(node):
-        pass
-    
-    @staticmethod
-    def sentence(node):
-        pass
+
     
     @staticmethod
     def type_declare_sentence(node, offset):
+
         t = SemanticFunctionSet.type_statement(node.next[-1])
-        ids = SemanticFunctionSet.id_list(node.next[-2], t, offset)
-        # 
+        ids, width = SemanticFunctionSet.id_list(node.next[-2], t, offset)
+        return len(ids), width
         
 
     @staticmethod
@@ -103,21 +104,23 @@ class SemanticFunctionSet:
     
     @staticmethod
     def id_list(node, T:Type, offset):
-
         # 约定声明语句会返回声明变量的列表 & 初始化列表一一匹配
         if node.production == Production.bystr("id_list->id@,@id_list"):
             # 先将 id 添加到符号表
             smb_t.insert(Record(node.next[-1].val.val, type_=T, offset = offset))
             offset += T.width
+
+            ids, width = SemanticFunctionSet.id_list(node.next[0], T, offset)
             
-            return SemanticFunctionSet.sentence_list(node.next[0], T, offset) + [node.next[-1].val.val]
+            return ids + [node.next[-1].val.val], width + T.width
         
         elif node.production == Production.bystr("id_list->id"):
             # 此处是参数列表的第一个参数， 从此开始是函数体作用域了， 故使用 location 进行定位
+
             smb_t.insert(Record(node.next[-1].val.val, type_=T, offset=offset))
-            smb_t.location()
+
             offset += T.width
-            return [node.next[-1].val.val] 
+            return [node.next[-1].val.val], T.width
     @staticmethod
     def initialize(node,):
         # 这是关于 初始化列表 的定义， 
@@ -128,7 +131,7 @@ class SemanticFunctionSet:
     # 函数的名字应该在外部声明， 包含（名字， 参数数量， 参数宽度， 返回值类型， 局部数据区总宽度）
     # 参数的名字应该在内部声明， 包含？
     @staticmethod
-    def func_declare(node, ):
+    def func_define(node, ):
         # TODO：在此处发现了词法分析的 bug 标识符不能出现下划线
         # 1. 添加函数头部， 进入函数（名字， 参数数量， 参数宽度， 返回值类型， 局部数据区总宽度）
         # 我们需要将函数头部的定义放到函数外部的区域， 内部的进行重定位
@@ -138,33 +141,50 @@ class SemanticFunctionSet:
         function_name = node.next[-2].val.val
 
         smb_t.insert(Record(function_name, type_ = FuncType(param_num =None, param_width=None, return_type=return_type, domain_width=None)))
+        
+        smb_t.insert(Record("Enter domain"))
+        smb_t.location()
 
-        param_num, param_width = SemanticFunctionSet.list_(node.next[-4], 0)
+        # 这里的 0 是函数参数列表开始的偏移量
+        param_num, param_width = SemanticFunctionSet.list_e(node.next[-4], 0)
 
-        record = smb_t.find(function_name)
+        record, _ = smb_t.find(function_name)
         record.TYPE.param_num = param_num
         record.TYPE.param_width = param_width
         
         # 处理函数体, 要求返回函数体中的变量宽度
-        domain_width = SemanticFunctionSet.complex_sentence(node.next[0])
+        # 便于调用函数时， 分配内存， 由于参数是传递的， 是在调用处作用域的变量， 无需分配
+        domain_num, domain_width = SemanticFunctionSet.complex_sentence(node.next[0], param_width, forward = 'function')
         record.TYPE.domain_width = domain_width
+
+        # 到这里， 使用该产生式 进行规约的时候已经处理完函数， 要进行重定位
+
+        print("Touch The end of domain Symbol Table will be relocation")
+        smb_t.print()
+        smb_t.relocation()
+
+        # func_declare 作为一个 sentence 元素因该返回 该调用 的总变量长度和数量
+        # 但是函数的局部变量是 在函数执行完成后 回收的
+        return param_num + domain_num, param_width + domain_width
 
 
 
 
     @staticmethod
-    def list_(node, offeset):
-        if node.production == Production.bystr("list@,@parameter"):
-            param_num, param_width = list_(node.next[-1], offset)
+    def list_e(node, offset):
 
-            record = parameter(node.next[0], param_width)
+        if node.production == Production.bystr("list->list@,@parameter"):
+            param_num, param_width = SemanticFunctionSet.list_e(node.next[-1], offset)
+
+            record = SemanticFunctionSet.parameter(node.next[0], param_width)
             smb_t.insert(record)
 
-            return  param_num + 1, param_width + record.TYPE.width         
+            return param_num + 1, param_width + record.TYPE.width         
         
-        elif node.production == Production.bystr("list@parameter"):
-            record = parameter(node.next[-1], offset)
-            smb_t.insert(t)
+        elif node.production == Production.bystr("list->parameter"):
+            record = SemanticFunctionSet.parameter(node.next[-1], offset)
+            smb_t.insert(record)
+
             return  1, record.TYPE.width
     @staticmethod
     def parameter(node, offset):
@@ -176,43 +196,310 @@ class SemanticFunctionSet:
             return Record(str(time.time()), type_=t, offset=offset)
     # 统计作用域中的参数宽度
     @staticmethod
-    def complex_sentence(node, ):
+    def complex_sentence(node, offset, forward = 'domain'):
         if node.production == Production.bystr("complex_sentence->{@sentence_list@}"):
-            pass
+            # 这里的返回值是两个
+            if forward == 'domain':
+                smb_t.location()
+            num, width = SemanticFunctionSet.sentence_list(node.next[1], offset)
+
+            if forward == 'domain':
+                print("Touch The end of domain Symbol Table will be relocation")
+                smb_t.print()
+                
+                smb_t.relocation()
+            return num, width
         
     
     @staticmethod
-    def sentence_list(node, ):
+    def sentence_list(node, offset):
+
         if node.production == Production.bystr("sentence_list->sentence@sentence_list"):
-            pass
-        if node.production == Production.bystr("sentence_list->sentence_list"):
-            pass
-        if node.production == Production.bystr("sentence_list->e_"):
-            pass
+            # 处理第一个句子偏移量不变
+            num1, width1 = SemanticFunctionSet.sentence(node.next[-1], offset)
+
+            offset += width1
+            # 处理句子列表 偏移量从
+            num2, width2 = SemanticFunctionSet.sentence_list(node.next[0], offset)
+
+            return num1 + num2, width1 + width2
+        
+        elif node.production == Production.bystr("sentence_list->sentence"):
+            num, width = SemanticFunctionSet.sentence(node.next[0], offset)
+            return num, width 
+
+        # 其他情况无论是 ->e_ 还是什么的都做 0，0 处理
+
+        return 0, 0
 
     @staticmethod
-    def sentence(node, ):
+    def sentence(node, offset):
         # 一下的每种句子都需要记录分配变量的宽度
         # func_define|if_sentence|for_sentence|while_sentence|go_sentence|expression_sentence|type_declare_sentence|complex_sentence
+        # sentence 的返回值 是 2 个综合属性    1. 变量数目  2. 变量宽度
+        # sentence 需要传入变量 offset， 但是函数定义的是特殊的， 他的入口偏移量固定为 0 ，根据不同的调用点 动态的分配变量空间 
 
         if node.production == Production.bystr("sentence->func_define"):
-            pass
-        if node.production == Production.bystr("sentence->if_sentence"):
+            # 函数声明不分配变量
+            SemanticFunctionSet.func_define(node.next[0], )
+
+            # 需要为函数名 在当前作用域 分配一个变量
+            return 1, 0
+        
+        elif node.production == Production.bystr("sentence->if_sentence"):
             pass
 
-        if node.production == Production.bystr("sentence->for_sentenc"):
+        elif node.production == Production.bystr("sentence->for_sentenc"):
             pass
-        if node.production == Production.bystr("sentence->while_sentence"):
+        
+        elif node.production == Production.bystr("sentence->while_sentence"):
             pass
-        if node.production == Production.bystr("sentence->go_sentence"):
+        
+        elif node.production == Production.bystr("sentence->go_sentence"):
             pass
 
-        if node.production == Production.bystr("sentence->expression_sentence"):
-            pass
-        if node.production == Production.bystr("sentence->type_declare_sentence"):
-            pass
-        if node.production == Production.bystr("sentence->complex_sentence"):
-            pass
+        elif node.production == Production.bystr("sentence->expression_sentence"):
+            SemanticFunctionSet.expression_sentence(node.next[0])
+            return 0, 0
+        
+        elif node.production == Production.bystr("sentence->type_declare_sentence"):
+            num, width = SemanticFunctionSet.type_declare_sentence(node.next[0], offset)
+            return num, width
+        
+        elif node.production == Production.bystr("sentence->complex_sentence"):
+            num, width = SemanticFunctionSet.complex_sentence(node.next[0], offset)
+            return num, width
+
+    @staticmethod
+    def expression_sentence(node):
+        _, _ = SemanticFunctionSet.E1(node.next[-1])
+
+    @staticmethod
+    def E(node, ):
+        # 'E->(@E1@)|id|NUM|STR|id@(@E1@)',
+        if node.production == Production.bystr("E->(@E1@)"):
+            t = SemanticFunctionSet.E(node.next[-2], )
+            return t
+        elif node.production == Production.bystr("E->id"):
+
+            t = smb_t.find(node.next[0].val.val)[0].TYPE
+            return t
+        elif node.production == Production.bystr("E->NUM"):
+            if '.' in node.next[0].val.val:
+                t = Type('float', type_ = 'constant')
+            else:
+                t = Type('int', type_ = 'constant')
+            return t
+        elif node.production == Production.bystr("E->STR"):
+            return Type('void')
+        elif node.production == Production.bystr("E->id@(@E_dot_exp@)"):
+            # param_type -> [Type, Type, ...]
+            param_num, param_type = SemanticFunctionSet.E_dot_exp(node.next[-3], )
+            
+            # smb_t.print()
+            # print(node.next[-1].val.val)
+            func, _ = smb_t.find(node.next[-1].val.val)
+            t = None
+            if isinstance(func.TYPE, FuncType) and param_num == 0:
+                t = func.TYPE.return_type
+                return t
+            # TODO： 这里涉及了如何 check 参数 和 类型， 这里我们需要定义 X 运算， 暂时不实现
+            elif isinstance(func.TYPE, FuncType) and param_num == func.TYPE.param_num and func.TYPE.equal(param_type):
+                t = func.TYPE.return_type
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E->(@E2@)"):
+            t = SemanticFunctionSet.E2(node.next[-2], )
+            return t
+        elif node.production == Production.bystr("E->"):
+            return Type('void')
+        else:
+            # print(node.production)
+            raise Exception("Type Error!")
+
+    @staticmethod
+    def E1(node, ):
+        # 赋值表达式要求左边的类型是 变量
+        if node.production == Production.bystr("E1->E1@F1@E_dot_exp"):
+            n1, t1 = SemanticFunctionSet.E1(node.next[-1])
+            n2, t2 = SemanticFunctionSet.E_dot_exp(node.next[-3])
+
+            check = True
+            if n1 != n2:check = False
+            for t in t1:
+                if t.type == 'constant':check = False
+            for i in range(min(n1,n2)):
+                if t1[i].name != t2[i].name:
+                    check = False
+            if check:
+                return n1, t1
+
+            else:
+                raise Exception('Type Error!')
+
+        elif node.production == Production.bystr("E1->E_dot_exp"):
+            n, t_l = SemanticFunctionSet.E_dot_exp(node.next[-1])
+            return n, t_l
+
+    # 返回一个类型列表
+    @staticmethod
+    def E_dot_exp(node, ):
+        # 需要返回 逗号表达式数量
+        if node.production == Production.bystr("E_dot_exp->E_dot_exp@F_dot_exp@E2"):
+            n1, t1 = SemanticFunctionSet.E_dot_exp(node.next[-1])
+            t2 = SemanticFunctionSet.E2(node.next[-3])
+            return n1 + 1, t1 + [t2]
+
+        elif node.production == Production.bystr("E_dot_exp->E2"):
+            t = SemanticFunctionSet.E2(node.next[-1])
+            # print('*'*100)
+            # print(t, type(t))
+
+
+            if t.name == 'void':
+                return 0, [t]
+            else:
+                return 1, [t]
+            
+
+    @staticmethod
+    def E2(node, ):
+
+
+        if node.production == Production.bystr("E2->E2@F2@E3"):
+            t1 = SemanticFunctionSet.E2(node.next[-1])
+            t2 = SemanticFunctionSet.E3(node.next[-3])
+            if t1.TYPE.name == t2.TYPE.name == 'boolen':
+                t = Type('boolen')
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E2->E3"):
+            t = SemanticFunctionSet.E3(node.next[0])
+            return t
+
+    @staticmethod
+    def E3(node, ):
+
+        if node.production == Production.bystr("E3->E3@F3@E4"):
+            t1 = SemanticFunctionSet.E3(node.next[-1])
+            t2 = SemanticFunctionSet.E4(node.next[-3])
+            if t1.TYPE.name == t2.TYPE.name == 'boolen':
+                t = Type('boolen')
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E3->E4"):
+            t = SemanticFunctionSet.E4(node.next[0])
+            return t
+    @staticmethod
+    def E4(node, ):
+
+        if node.production == Production.bystr("E4->E4@F4@E5"):
+            t1 = SemanticFunctionSet.E4(node.next[-1])
+            t2 = SemanticFunctionSet.E5(node.next[-3])
+            if t1.name == t2.name:
+                t = Type('boolen')
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E4->E5"):
+            t = SemanticFunctionSet.E5(node.next[0])
+            return t
+    @staticmethod
+    def E5(node, ):
+
+        if node.production == Production.bystr("E5->E5@F5@E6"):
+            t1 = SemanticFunctionSet.E5(node.next[-1])
+            t2 = SemanticFunctionSet.E6(node.next[-3])
+            if t1.name == t2.name:
+                t = Type('boolen')
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E5->E6"):
+            t = SemanticFunctionSet.E6(node.next[0])
+            return t
+    @staticmethod
+    def E6(node, ):
+
+        if node.production == Production.bystr("E6->E6@F6@E7"):
+            t1 = SemanticFunctionSet.E6(node.next[-1])
+            t2 = SemanticFunctionSet.E7(node.next[-3])
+            if t1.name == 'int' and t2.name == 'int':
+                t = Type('int')
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E6->E7"):
+            t = SemanticFunctionSet.E7(node.next[0])
+            return t
+    @staticmethod
+    def E7(node, ):
+
+        if node.production == Production.bystr("E7->E7@F7@E8"):
+            t1 = SemanticFunctionSet.E7(node.next[-1])
+            t2 = SemanticFunctionSet.E8(node.next[-3])
+            if t1.name == t2.name:
+                t = t1
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E7->E8"):
+            t = SemanticFunctionSet.E8(node.next[0])
+            return t
+    @staticmethod
+    def E8(node, ):
+        if node.production == Production.bystr("E8->E8@F8@E9"):
+            t1 = SemanticFunctionSet.E8(node.next[-1])
+            t2 = SemanticFunctionSet.E9(node.next[-3])
+            if t1.name == t2.name:
+                t = Type('int')
+                return t
+            else:
+                raise Exception("Type Error!")
+        elif node.production == Production.bystr("E8->E9"):
+            t = SemanticFunctionSet.E9(node.next[0])
+            return t
+    @staticmethod
+    def E9(node, ):
+        if node.production == Production.bystr("E9->E10@F9_1"):
+            t = SemanticFunctionSet.E10(node.next[-1])
+            return t
+
+        # TODO：取地址 & 取值 & 取自身
+        elif node.production == Production.bystr("E9->F9_2@E10"):
+            t = SemanticFunctionSet.E9(node.next[0])
+            return t
+        
+        elif node.production == Production.bystr("E9->F9_1@E10"):
+            t = SemanticFunctionSet.E10(node.next[-2])
+            return t
+        
+        elif node.production == Production.bystr("E9->E10"):
+            t = SemanticFunctionSet.E10(node.next[0])
+            return t
+    
+    @staticmethod
+    def E10(node, ):
+        if node.production == Production.bystr("E10->E10@[@E10@]"):
+            t1 = SemanticFunctionSet.E10(node.next[-1])
+            t2 = SemanticFunctionSet.E10(node.next[-3])
+            if t2.TYPE == 'int' and t1.TYPE.name == 'pointer':
+                return t
+            else:
+                raise Exception("Type Error!")
+
+        # TODO：取地址 & 取值 & 取自身
+        elif node.production == Production.bystr("E10->E"):
+            t = SemanticFunctionSet.E(node.next[0])
+            return t
+        
+
+
+    
+
 
 if __name__ == "__main__":
     getattr(SemanticFunctionSet,"test_demo")(1,2,3)

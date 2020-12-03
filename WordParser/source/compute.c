@@ -1,4 +1,10 @@
-int func(int a, int b){
-    int tmp1 = a + b;
-    int tmp2 = tmp1 + 1;
+int func1(int a, int b){
+    int c;
+    int d;
+    d = 1;
+    int func2(int c, int d, int i, int j){
+        int e, f, g, h;
+        e = c + d * (h - g);
+    }
+    func2(1,2,3,4);
 }
