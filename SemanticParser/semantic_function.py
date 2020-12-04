@@ -68,7 +68,7 @@ class SemanticFunctionSet:
         smb_t.location()
 
         num, width = SemanticFunctionSet.sentence_list(node.next[0], 0)
-        smb_t.print()
+
         return num, width
         
     
@@ -216,8 +216,8 @@ class SemanticFunctionSet:
 
         if node.production == Production.bystr("sentence_list->sentence@sentence_list"):
             # 处理第一个句子偏移量不变
+            
             num1, width1 = SemanticFunctionSet.sentence(node.next[-1], offset)
-
             offset += width1
             # 处理句子列表 偏移量从
             num2, width2 = SemanticFunctionSet.sentence_list(node.next[0], offset)
@@ -238,7 +238,7 @@ class SemanticFunctionSet:
         # func_define|if_sentence|for_sentence|while_sentence|go_sentence|expression_sentence|type_declare_sentence|complex_sentence
         # sentence 的返回值 是 2 个综合属性    1. 变量数目  2. 变量宽度
         # sentence 需要传入变量 offset， 但是函数定义的是特殊的， 他的入口偏移量固定为 0 ，根据不同的调用点 动态的分配变量空间 
-
+        print(node.production)
         if node.production == Production.bystr("sentence->func_define"):
             # 函数声明不分配变量
             SemanticFunctionSet.func_define(node.next[0], )
@@ -247,19 +247,22 @@ class SemanticFunctionSet:
             return 1, 0
         
         elif node.production == Production.bystr("sentence->if_sentence"):
-            pass
+            n,w = SemanticFunctionSet.if_sentence(node.next[0], offset)
+            return n,w
 
-        elif node.production == Production.bystr("sentence->for_sentenc"):
-            pass
+        elif node.production == Production.bystr("sentence->for_sentence"):
+            n,w = SemanticFunctionSet.for_sentence(node.next[0], offset)
+            return n,w
         
         elif node.production == Production.bystr("sentence->while_sentence"):
-            pass
+            n,w = SemanticFunctionSet.while_sentence(node.next[0], offset)
+            return n,w
         
         elif node.production == Production.bystr("sentence->go_sentence"):
             pass
 
         elif node.production == Production.bystr("sentence->expression_sentence"):
-            SemanticFunctionSet.expression_sentence(node.next[0])
+            _,_ = SemanticFunctionSet.expression_sentence(node.next[0])
             return 0, 0
         
         elif node.production == Production.bystr("sentence->type_declare_sentence"):
@@ -273,6 +276,7 @@ class SemanticFunctionSet:
     @staticmethod
     def expression_sentence(node):
         _, _ = SemanticFunctionSet.E1(node.next[-1])
+        return 0, 0
 
     @staticmethod
     def E(node, ):
@@ -296,8 +300,7 @@ class SemanticFunctionSet:
             # param_type -> [Type, Type, ...]
             param_num, param_type = SemanticFunctionSet.E_dot_exp(node.next[-3], )
             
-            # smb_t.print()
-            # print(node.next[-1].val.val)
+
             func, _ = smb_t.find(node.next[-1].val.val)
             t = None
             if isinstance(func.TYPE, FuncType) and param_num == 0:
@@ -308,7 +311,8 @@ class SemanticFunctionSet:
                 t = func.TYPE.return_type
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[-1].val.pos))
+
         elif node.production == Production.bystr("E->(@E2@)"):
             t = SemanticFunctionSet.E2(node.next[-2], )
             return t
@@ -316,7 +320,7 @@ class SemanticFunctionSet:
             return Type('void')
         else:
             # print(node.production)
-            raise Exception("Type Error!")
+            raise Exception("No match production!")
 
     @staticmethod
     def E1(node, ):
@@ -374,7 +378,7 @@ class SemanticFunctionSet:
                 t = Type('boolen')
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
         elif node.production == Production.bystr("E2->E3"):
             t = SemanticFunctionSet.E3(node.next[0])
             return t
@@ -389,7 +393,7 @@ class SemanticFunctionSet:
                 t = Type('boolen')
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
         elif node.production == Production.bystr("E3->E4"):
             t = SemanticFunctionSet.E4(node.next[0])
             return t
@@ -403,7 +407,7 @@ class SemanticFunctionSet:
                 t = Type('boolen')
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
         elif node.production == Production.bystr("E4->E5"):
             t = SemanticFunctionSet.E5(node.next[0])
             return t
@@ -417,7 +421,7 @@ class SemanticFunctionSet:
                 t = Type('boolen')
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
         elif node.production == Production.bystr("E5->E6"):
             t = SemanticFunctionSet.E6(node.next[0])
             return t
@@ -431,7 +435,7 @@ class SemanticFunctionSet:
                 t = Type('int')
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
         elif node.production == Production.bystr("E6->E7"):
             t = SemanticFunctionSet.E7(node.next[0])
             return t
@@ -445,7 +449,7 @@ class SemanticFunctionSet:
                 t = t1
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
         elif node.production == Production.bystr("E7->E8"):
             t = SemanticFunctionSet.E8(node.next[0])
             return t
@@ -458,7 +462,7 @@ class SemanticFunctionSet:
                 t = Type('int')
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
         elif node.production == Production.bystr("E8->E9"):
             t = SemanticFunctionSet.E9(node.next[0])
             return t
@@ -489,7 +493,7 @@ class SemanticFunctionSet:
             if t2.TYPE == 'int' and t1.TYPE.name == 'pointer':
                 return t
             else:
-                raise Exception("Type Error!")
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
 
         # TODO：取地址 & 取值 & 取自身
         elif node.production == Production.bystr("E10->E"):
@@ -497,7 +501,103 @@ class SemanticFunctionSet:
             return t
         
 
+    @staticmethod
+    def state(node, offset):
+        n, width = 0, 0
+        if node.production == Production.bystr("state->complex_sentence"):
+            n, width = SemanticFunctionSet.complex_sentence(node.next[0], offset)
+            
+        elif node.production == Production.bystr("state->sentence"):
+            n, width = SemanticFunctionSet.sentence(node.next[0], offset)
+        return n, width
+    @staticmethod
+    def if_sentence(node, offset):
+        # 'if_sentence -> if@(@E1@)@state@else@state|if@(@E1@)@state'
+        n, width = 0, 0
+        if node.production == Production.bystr("if_sentence -> if@(@E2@)@state@else@state"):
+            t = SemanticFunctionSet.E2(node.next[-3])
+            if t.name == 'boolen':
+                # -5-7
+                n1, w1 = SemanticFunctionSet.state(node.next[-5], offset)
+                n2, w2 = SemanticFunctionSet.state(node.next[-7], offset + w1)
+                n = n1 + n2
+                width = w1 + w2
+            else:
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
 
+            
+            
+        elif node.production == Production.bystr("if_sentence -> if@(@E2@)@state"):
+            t = SemanticFunctionSet.E2(node.next[-3])
+            if t.name == 'boolen':
+                # -5-7
+                n, width = SemanticFunctionSet.state(node.next[-5], offset)
+            else:
+                raise Exception("type error in line {}".format(node.next[0].val.pos))
+
+        # 虽然有 变量数量和宽度， 但是在作用于结束的时候可以释放所以返回宽度不算
+        return 0,0
+
+    @staticmethod
+    def for_sentence(node, offset):
+        # 'for_sentence-> for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@complex_sentence
+        #                 for@(@loop_control_sentence@)@sentence',
+        # 此处由于 for 语句中可能有 变量声明， 所以一个 for 语句实际是两个 嵌套作用域
+        smb_t.insert(Record('Enter for loop'))
+        smb_t.location()
+
+        n1, w1 = SemanticFunctionSet.loop_control_sentence(node.next[-3], offset)
+        offset += w1
+        n2, w2 = SemanticFunctionSet.loop_control_sentence(node.next[-4], offset)
+        offset += w2
+        n3, w3 = SemanticFunctionSet.loop_control_sentence(node.next[-5], offset)
+        offset += w3
+        
+        if node.production == Production.bystr("for_sentence-> for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@complex_sentence"):
+            # -3-4-5-7
+            
+            n4, w4 = SemanticFunctionSet.complex_sentence(node.next[-7], offset)
+    
+        elif node.production == Production.bystr("for_sentence-> for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@sentence"):
+            
+            n4, w4 = SemanticFunctionSet.sentence(node.next[0], offset)
+            
+        n, w = n1+n2+n3+n4, w1+w2+w3+w4
+        smb_t.relocation()
+        return 0, 0
+
+    @staticmethod
+    def loop_control_sentence(node, offset):
+        n, w = 0, 0
+        if node.production == Production.bystr("loop_control_sentence->expression_sentence"):
+            n, w = SemanticFunctionSet.expression_sentence(node.next[0])
+            
+        elif node.production == Production.bystr("loop_control_sentence->type_declare_sentence"):
+            n, w = SemanticFunctionSet.type_declare_sentence(node.next[0], offset)
+        return n, w
+    
+    @staticmethod
+    def while_sentence(node, offset):
+        # while_sentence->while@(@E2@)@state
+        t = SemanticFunctionSet.E2(node.next[-3])
+        if t.name == 'boolen':
+            n, w = SemanticFunctionSet.state(node.next[-5], offset)
+        else:
+            raise Exception("type error in line {}".format(node.next[0].val.pos))
+        return 0, 0
+    
+    @staticmethod
+    def go_sentence(node, ):
+        # 'go_sentence->CONTINUE@;|BREAK@;|RETURN@;|RETURN@expression@;',
+        if node.production == Production.bystr("go_sentence->CONTINUE@;"):
+            pass
+            
+        elif node.production == Production.bystr("go_sentence->BREAK@;"):
+            pass
+        elif node.production == Production.bystr("go_sentence->RETURN@;"):
+            pass
+        elif node.production == Production.bystr("go_sentence->RETURN@E2@;"):
+            pass
     
 
 

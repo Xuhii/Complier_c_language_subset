@@ -17,16 +17,17 @@ G_CC = [
     'S->sentence_list',
     'sentence_list->sentence@sentence_list|sentence|e_',
     'sentence-> func_define|if_sentence|for_sentence|while_sentence|go_sentence|expression_sentence|type_declare_sentence|complex_sentence',
-    'go_sentence->CONTINUE@;|BREAK@;|RETURN@;|RETURN@expression@;',
+    'go_sentence->CONTINUE@;|BREAK@;|RETURN@;|RETURN@E2@;',
     'complex_sentence->{@sentence_list@}',
 
     # if else while for
     'state->complex_sentence|sentence',
-    'if_sentence -> if@(@E1@)@state@else@state|if@(@E1@)@state',
-    'for_sentence-> for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@complex_sentence|for@(@loop_control_sentence@)@sentence',
+    
+    'if_sentence -> if@(@E2@)@state@else@state|if@(@E2@)@state',
+    'for_sentence-> for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@complex_sentence|for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@sentence',
     'loop_control_sentence->expression_sentence|type_declare_sentence',
 
-    'while_sentence->while@(@expression@)@state',
+    'while_sentence->while@(@E2@)@state',
 
     # 定义expressionsentence
     # 数字越大优先级越大

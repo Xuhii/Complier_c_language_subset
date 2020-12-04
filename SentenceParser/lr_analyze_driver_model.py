@@ -33,7 +33,11 @@ class LrAnalyzeDriver:
         state, smb, = [0], []
         while True:
             S, a = state[-1], W.cur()
-            action = self.Table.action[S][a]
+            try:
+                action = self.Table.action[S][a]
+            except:
+                raise Exception("<Symbol:'{}',{}>".format(a.val, a.pos))
+
             
             if action.ACTION == 'S':
                 # 三个栈在 Shift 动作保持一致
