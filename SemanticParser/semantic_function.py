@@ -147,8 +147,10 @@ class SemanticFunctionSet:
 
         # 这里的 0 是函数参数列表开始的偏移量
         param_num, param_width = SemanticFunctionSet.list_e(node.next[-4], 0)
-
-        record, _ = smb_t.find(function_name)
+        try:
+            record, _ = smb_t.find(function_name)
+        except:
+            raise Exception("Id Undefine {}, {}".format(function_name, node.next[-2].val.pos))
         record.TYPE.param_num = param_num
         record.TYPE.param_width = param_width
         
@@ -200,13 +202,14 @@ class SemanticFunctionSet:
         if node.production == Production.bystr("complex_sentence->{@sentence_list@}"):
             # 这里的返回值是两个
             if forward == 'domain':
+                smb_t.insert(Record("Enter Domain"))
                 smb_t.location()
+            
             num, width = SemanticFunctionSet.sentence_list(node.next[1], offset)
 
             if forward == 'domain':
                 print("Touch The end of domain Symbol Table will be relocation")
                 smb_t.print()
-                
                 smb_t.relocation()
             return num, width
         
@@ -285,9 +288,13 @@ class SemanticFunctionSet:
             t = SemanticFunctionSet.E(node.next[-2], )
             return t
         elif node.production == Production.bystr("E->id"):
-
-            t = smb_t.find(node.next[0].val.val)[0].TYPE
-            return t
+            try:
+                t = smb_t.find(node.next[0].val.val)[0].TYPE
+                return t
+            except:
+                
+                raise Exception("{}, {}".format(node.next[0].val.val, node.next[0].val.pos))
+        
         elif node.production == Production.bystr("E->NUM"):
             if '.' in node.next[0].val.val:
                 t = Type('float', type_ = 'constant')
@@ -311,7 +318,7 @@ class SemanticFunctionSet:
                 t = func.TYPE.return_type
                 return t
             else:
-                raise Exception("type error in line {}".format(node.next[-1].val.pos))
+                raise Exception("{} type error in line {}".format(node.next[-1].val.val, node.next[-1].val.pos))
 
         elif node.production == Production.bystr("E->(@E2@)"):
             t = SemanticFunctionSet.E2(node.next[-2], )
@@ -330,12 +337,16 @@ class SemanticFunctionSet:
             n2, t2 = SemanticFunctionSet.E_dot_exp(node.next[-3])
 
             check = True
+            print(t1, t2)
             if n1 != n2:check = False
+            
             for t in t1:
                 if t.type == 'constant':check = False
+            
             for i in range(min(n1,n2)):
                 if t1[i].name != t2[i].name:
                     check = False
+
             if check:
                 return n1, t1
 
@@ -374,8 +385,11 @@ class SemanticFunctionSet:
         if node.production == Production.bystr("E2->E2@F2@E3"):
             t1 = SemanticFunctionSet.E2(node.next[-1])
             t2 = SemanticFunctionSet.E3(node.next[-3])
-            if t1.TYPE.name == t2.TYPE.name == 'boolen':
+            if t1.name == t2.name == 'boolen':
                 t = Type('boolen')
+                return t
+            elif t1.name == t2.name == 'int':
+                t = Type('int')
                 return t
             else:
                 raise Exception("type error in line {}".format(node.next[0].val.pos))
@@ -389,8 +403,11 @@ class SemanticFunctionSet:
         if node.production == Production.bystr("E3->E3@F3@E4"):
             t1 = SemanticFunctionSet.E3(node.next[-1])
             t2 = SemanticFunctionSet.E4(node.next[-3])
-            if t1.TYPE.name == t2.TYPE.name == 'boolen':
+            if t1.name == t2.name == 'boolen':
                 t = Type('boolen')
+                return t
+            elif t1.name == t2.name == 'int':
+                t = Type('int')
                 return t
             else:
                 raise Exception("type error in line {}".format(node.next[0].val.pos))
@@ -518,6 +535,7 @@ class SemanticFunctionSet:
             t = SemanticFunctionSet.E2(node.next[-3])
             if t.name == 'boolen':
                 # -5-7
+                print(node)
                 n1, w1 = SemanticFunctionSet.state(node.next[-5], offset)
                 n2, w2 = SemanticFunctionSet.state(node.next[-7], offset + w1)
                 n = n1 + n2

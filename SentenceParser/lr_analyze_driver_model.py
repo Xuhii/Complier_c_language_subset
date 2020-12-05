@@ -33,6 +33,7 @@ class LrAnalyzeDriver:
         state, smb, = [0], []
         while True:
             S, a = state[-1], W.cur()
+            # action = self.Table.action[S][a]
             try:
                 action = self.Table.action[S][a]
             except:

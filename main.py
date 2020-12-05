@@ -19,7 +19,7 @@ from SemanticParser.semantic_function import *
 # s_parser(G_CC, string, 'slr', debug=True)
 
 
-w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/compute.c')
+w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/light.c')
 # w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/demo.c')
 
 print(w)
