@@ -52,6 +52,7 @@
 **运行程序**
 
 ```bash
+# 将代编译文件放入 Complier/WordParser/source
 python Complier/main.py [filename]
 ```
 
