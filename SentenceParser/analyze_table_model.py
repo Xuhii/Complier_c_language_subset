@@ -74,7 +74,9 @@ class AnalyzeTable:
                             self.T[s][sbm] = self.C.index(tmp)
         # print(self.C)
     def __str__(self):
-        return "Gammar:{0}\n\nACTION TABEL:\n{1}\n\nGOTO TABLE:\n{2}".format(self.G, self.action, self.goto)
+        action_str = "\n".join(map(lambda x:str(x), self.action))
+        goto_str = "\n".join(map(lambda x:str(x), self.goto))
+        return "Action Table:\n{0}\n\nGoto Table:\n{1}".format(action_str, goto_str)
     # closure 和 go 和 reItemSet 方法是所有分析表通用的方法， 应该放到父类中， 但是是否应该写为 classmethod 方便外部调用呢？ 应该没必要
     
 class SLR(AnalyzeTable):

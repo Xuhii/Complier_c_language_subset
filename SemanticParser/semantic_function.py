@@ -203,7 +203,7 @@ class SemanticFunctionSet:
             # 这里的返回值是两个
             if forward == 'domain':
                 smb_t.insert(Record("Enter Domain"))
-                smb_t.location()
+                smb_t.location() 
             
             num, width = SemanticFunctionSet.sentence_list(node.next[1], offset)
 

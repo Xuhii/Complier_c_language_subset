@@ -1,3 +1,4 @@
+import os
 from SentenceParser.lr_analyze_driver_model import s_parser
 # from SentenceParser.gramma_model import G_CC
 from WordParser.word_parser import w_parser
@@ -17,15 +18,20 @@ from SemanticParser.semantic_function import *
 # s_parser(G_e__test, 'a a a a a', 'slr')
 # string = 'if ( id + id ) id * id ;'
 # s_parser(G_CC, string, 'slr', debug=True)
-
+def write(filename, data):
+    with open(filename, 'w') as f:
+        f.write(data.__str__())
 
 w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/light.c')
 # w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/demo.c')
 
-print(w)
-root_node = s_parser(G_CC, w.check(), 'slr')
-# 绘制分析树
-print(root_node)
+root_node, table = s_parser(G_CC, w.check(), 'slr')
+
+# 输出
+if not os.path.exists('out'):os.makedirs('out')
+write('out/token.out', w)
+write('out/tree.out', root_node)
+write('out/table.out', table)
 
 
 # 测试 简单语义分析

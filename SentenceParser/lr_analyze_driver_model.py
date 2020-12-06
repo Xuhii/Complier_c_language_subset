@@ -13,8 +13,8 @@
 # 3. 为 文法 G 构造 FIRST 集合 和 FOLLOW 集合
 # 4. 根据 正则项目集簇 和 FOLLOW 集合， 构造分析表（ ACTION 表 和 goto 表）， 其中 ACTION 表中每一项都是一个 Action 类
 
-from SentenceParser.gramma_model import *
 import copy
+from SentenceParser.gramma_model import *
 from functools import reduce
 from SentenceParser.analyze_table_model import *
 from SentenceParser.token_stack_model import *
@@ -39,7 +39,6 @@ class LrAnalyzeDriver:
             except:
                 raise Exception("<Symbol:'{}',{}>".format(a.val, a.pos))
 
-            
             if action.ACTION == 'S':
                 # 三个栈在 Shift 动作保持一致
                 state.append(action.CONTENT)
@@ -66,26 +65,46 @@ class LrAnalyzeDriver:
                 return
             else:
                 pass
+import hashlib
+import pickle
+def hash_check(g):
+    md5 = hashlib.md5()
+    in_data = str(g).split(',')
+    for d in in_data:
+        md5.update(d.encode('UTF-8'))
+    return md5.hexdigest()
+
+def write(filename, data):
+    with open(filename, 'w') as f:
+        f.write(data.__str__())
 
 def s_parser(G, string, type='lr'):
-    
-    g = None
-    if type == 'lr':
-        g = LR(ProductionSet.by_ex_list(G), )
-    elif type == 'slr':
-        g = SLR(ProductionSet.by_ex_list(G), )
+    # 计算 G 的哈希值
+    # 如果该文法的哈希值与已有记录一致， 那么采用该分析表
+    # 如果不一致， 那么重新计算
+    hash_current_value, g = hash_check(G), None
+    try:
+        with open('SentenceParser/{}.pkl'.format(type), 'rb') as f:
+            data = pickle.load(f)
+            assert hash_current_value == data['HashValue']
+            g = data['AnalyzeTable']
+    except:
+        if type == 'lr':
+            g = LR(ProductionSet.by_ex_list(G), )
+        elif type == 'slr':
+            g = SLR(ProductionSet.by_ex_list(G), )
+        with open('SentenceParser/{}.pkl'.format(type),'wb') as f:
+            pickle.dump({'AnalyzeTable':g, 'HashValue':hash_current_value}, f, pickle.HIGHEST_PROTOCOL)
 
+    # 构建分析器
     lr = LrAnalyzeDriver(g)
     
-    if isinstance(string, str):
-        s = TokenStack.bystr(string)
-    else:
-        s = TokenStack.byword(string)
-    print("\n文法及分析表:", lr.Table)
-    print("\n输入:",string)
-    print("\n归约方式:")    
+    # 构建符号栈
+    s = TokenStack.bystr(string) if isinstance(string, str) else TokenStack.byword(string)
+
+    print("\n归约方式:\n")    
     lr.run(s)
-    return lr.tree_node
+    return lr.tree_node, lr.Table
 if __name__ == "__main__":
     
     # test(G_CC,"int v = a + b + c * d ;", 'lr')
