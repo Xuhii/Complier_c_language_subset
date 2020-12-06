@@ -1,4 +1,5 @@
 import os
+import sys
 from SentenceParser.lr_analyze_driver_model import s_parser
 # from SentenceParser.gramma_model import G_CC
 from WordParser.word_parser import w_parser
@@ -22,8 +23,7 @@ def write(filename, data):
     with open(filename, 'w') as f:
         f.write(data.__str__())
 
-w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/light.c')
-# w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/demo.c')
+w = w_parser('/home/ubuntu/Workplace/Complier/WordParser/source/' + sys.argv[1])
 
 root_node, table = s_parser(G_CC, w.check(), 'slr')
 
