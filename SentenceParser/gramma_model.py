@@ -24,8 +24,7 @@ G_CC = [
     'state->complex_sentence|sentence',
     
     'if_sentence -> if@(@E2@)@state@else@state|if@(@E2@)@state',
-    'for_sentence-> for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@complex_sentence|for@(@loop_control_sentence@loop_control_sentence@loop_control_sentence@)@sentence',
-    'loop_control_sentence->expression_sentence|type_declare_sentence',
+    'for_sentence-> for@(@E1@;@E2@;@E1@)@complex_sentence|for@(@E1@;@E2@;@E1@)@sentence',
 
     'while_sentence->while@(@E2@)@state',
 
@@ -61,7 +60,7 @@ G_CC = [
     'E9->E10@F9_1|F9_2@E10|F9_1@E10|E10',
     'E10->E10@[@E10@]|E',
     # 'E11->E11@,@E|E',
-    'E->(@E2@)|id|NUM|STR|id@(@E_dot_exp@)|e_',
+    'E->(@E2@)|id|NUM|STR|id@(@E_dot_exp@)|true|false|e_',
 
 
     # 函数

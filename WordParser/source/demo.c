@@ -4,9 +4,9 @@ int get(int a, int b, int c){
 int put(int d){
     d += 1;
 }
-int num1,num2,op,ans;
+int num1,num2,op,ans,i;
 get(num1,num2,op);
-for(int i=0;i<10;i++;){}
+for(i=0;i<10;i++;){}
 
 if(op==0)
 {

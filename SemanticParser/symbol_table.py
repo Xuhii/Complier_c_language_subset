@@ -19,7 +19,7 @@
 # Symbol -> name, final, val, pos(x,y)
 # 我们只取 name == id and final 的数据记录进符号表
 
-
+import time
 from prettytable import PrettyTable
 # 符号表结构：栈式哈希符号表
 class Record(object):
@@ -36,6 +36,8 @@ class Record(object):
         self.LINK_FIELD = link_field
     def __repr__(self):
         return [self.NAME,str(self.TYPE),str(self.ADDR),str(self.COUNT),str(self.DECLARE_LINE),str(self.REF_LINE_LIST),str(self.LINK_FIELD)]
+    def __str__(self):
+        return str(self.NAME) + str(self.TYPE)
 
 class SymbolTable(object):
     def __init__(self, hash_table_length = 100):
@@ -101,6 +103,12 @@ class SymbolTable(object):
 
         self.index_list.pop()
 
+    def _gen_var_name(self):
+        return "_var_" + str(time.time()).replace('.', '_')
+    def random_insert(self, type_):
+        tmp = Record(self._gen_var_name(), type_ = type_)
+        self.insert(tmp)
+        return tmp
 
 if __name__ == "__main__":
     # 符号表测试
