@@ -6,7 +6,7 @@ int put(int d){
 }
 int num1,num2,op,ans,i;
 get(num1,num2,op);
-for(i=0;i<10;i++;){}
+for(i=0;i<10;i++){}
 
 if(op==0)
 {

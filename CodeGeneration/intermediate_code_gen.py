@@ -192,6 +192,7 @@ def complex_sentence(node, offset, forward = 'domain'):
         if forward == 'domain':
             smb_t.relocation()
         return num, width, l
+    return 0,0,0
  
 # CHECK   
 def sentence_list(node, offset):
@@ -295,7 +296,7 @@ def E1(node, ):
     elif node.production == Production.bystr("E1->E_dot_exp"):
         n, t_l, e, l = E_dot_exp(node.next[-1])
         return n, t_l, e, l
-
+    return 0,0,0
 # 返回一个num, 类型列表, entry列表
 # CHECK
 def E_dot_exp(node, ):
@@ -339,6 +340,7 @@ def E2(node, ):
     elif node.production == Production.bystr("E2->E3"):
         t,e,l = E3(node.next[0])
         return t,e,l
+    return None, None, 0
 
 # CHECK
 def E3(node, ):
@@ -615,8 +617,8 @@ def for_sentence(node, offset):
     smb_t.insert(Record('Enter for loop'))
     smb_t.location()
 
-    n1, w1, l1 = E1(node.next[-3])
-    offset += w1
+    n1, w1, e, l1 = E1(node.next[-3])
+
     loop_start = nasm.index
 
     t, e, l2 = E2(node.next[-4])
@@ -642,7 +644,7 @@ def for_sentence(node, offset):
 
 
 
-    n, w = n1+n3+n4, w1+w3+w4
+    
     smb_t.relocation()
     return 0, 0, l1+l2+l3+l4+2
 

@@ -14,8 +14,9 @@ int func1(int a, int b){
         int fuck;
     }
     int flag = 1024;
+    int i;
     while(flag > 2) flag = flag - 1;
-    for(int i = 1; i < 10; i++;){
+    for(i = 1; i < 10; i++){
         flag += 1;
     }
     int end;
